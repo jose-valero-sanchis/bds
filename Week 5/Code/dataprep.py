@@ -21,11 +21,12 @@ data_dir = '../Data'
 filename = 'obs_lifethread.csv'
 path2load = join(data_dir, filename)
 
-data = #TODO B1.1
+data = read_csv(path2load, delimiter=';') #TODO B1.1
 
 # ONE-HOT ENCODING
 cols2encode = ['LIFE THREATENING']
-data = #TODO B1.2
+encoder = OneHotEncoder()
+data = encoder.one_hot_encode(data, cols2encode) #TODO B1.2
 
 # CLASS PREVALENCE
 labels_ohe = [col for col in data.columns if 'LAB_' in col]
@@ -34,11 +35,16 @@ prevalences = data_lab.sum() / data_lab.shape[0]
 print(prevalences)
 
 # TEXT PREPARATION
-data = #TODO B1.3
+text_prep = TextPreparator()
+data = text_prep.prepare(data['OBSERVATIONS']) #TODO B1.3
 
 # DATA SPLITTING
-train_indexes = #TODO B1.4
-test_indexes = #TODO B1.4
+n_total = len(data)
+indexes = arange(n_total)
+split_point = int(0.8 * n_total)
+
+train_indexes = indexes[:split_point] #TODO B1.4
+test_indexes = indexes[split_point:] #TODO B1.4
 
 data_train = data.iloc[train_indexes]
 data_eval = data.iloc[test_indexes]
