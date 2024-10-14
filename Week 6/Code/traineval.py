@@ -121,7 +121,7 @@ labs_eval = np.argmax(labels_eval.numpy(), axis=1)
 
 # METRICS CALCULATION
 # TODO B2.4: Calculate test metrics
-auc = #TODO B2.4: using sklearn.metrics as skmet
-accuracy = #TODO B2.4: using sklearn.metrics as skmet
-f1_score_macro = #TODO B2.4: using sklearn.metrics as skmet
+auc = skmet.roc_auc_score(labs_eval, pred_eval) #TODO B2.4: using sklearn.metrics as skmet
+accuracy = skmet.accuracy_score(labs_eval, pred_eval) #TODO B2.4: using sklearn.metrics as skmet
+f1_score_macro = skmet.f1_score(labs_eval, pred_eval, average= 'macro') #TODO B2.4: using sklearn.metrics as skmet
 print(auc, accuracy, f1_score_macro)
