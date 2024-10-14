@@ -50,7 +50,7 @@ class TextModel(Module):
         normalizer = BatchNorm1d(num_features=16)
         output_module.add_module('normalizer', normalizer)
         # activation function
-        activation_1 = LeakyReLU()  # TODO B2.1 Change this activation function
+        activation_1 = ReLU()  # TODO B2.1 Change this activation function
         output_module.add_module('activation_1', activation_1)
         # dropout
         dropout = Dropout(0.1)
