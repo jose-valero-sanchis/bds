@@ -14,7 +14,7 @@ import sklearn.metrics as skmet
 # TODO Import your data loaders and vocabulary size data here
 from textmodel import TextModel
 from dataprep import vocab_size
-from dataprep import #TODO B2.2
+from dataprep import dataloader_train, dataloader_eval#TODO B2.2
 
 # SETTINGS
 # TODO 2.3: Assign values to this hyperparameters
