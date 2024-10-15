@@ -21,7 +21,7 @@ data_dir = '../Data'
 filename = 'obs_lifethread.csv'
 path2load = join(data_dir, filename)
 
-data = read_csv(path2load, delimiter=';') #TODO B1.1
+data = read_csv(path2load, delimiter=';', encoding='cp1252') #TODO B1.1
 
 # ONE-HOT ENCODING
 cols2encode = ['LIFE THREATENING']
