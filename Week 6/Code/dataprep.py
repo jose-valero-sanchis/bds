@@ -14,7 +14,7 @@ from os.path import join
 from torch.utils.data import DataLoader
 from numpy import arange
 import torch as th
-
+from sklearn.model_selection import train_test_split
 
 # DATA LOADING
 data_dir = '../Data'
@@ -36,18 +36,10 @@ print(prevalences)
 
 # TEXT PREPARATION
 text_prep = TextPreparator()
-data = text_prep.prepare(data['OBSERVATIONS']) #TODO B1.3
+data = text_prep.prepare(data, 'OBSERVATIONS') #TODO B1.3
 
 # DATA SPLITTING
-n_total = len(data)
-indexes = arange(n_total)
-split_point = int(0.8 * n_total)
-
-train_indexes = indexes[:split_point] #TODO B1.4
-test_indexes = indexes[split_point:] #TODO B1.4
-
-data_train = data.iloc[train_indexes]
-data_eval = data.iloc[test_indexes]
+data_train, data_eval = train_test_split(data, test_size=0.2, random_state=42)
 
 #TODO B1.5
 # TEXT PREPROCESSING

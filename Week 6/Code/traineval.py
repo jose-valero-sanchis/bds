@@ -18,11 +18,37 @@ from dataprep import dataloader_train, dataloader_eval#TODO B2.2
 
 # SETTINGS
 # TODO 2.3: Assign values to this hyperparameters
-_LEARNING_RATE = 0.00001
-_EMBEDDING_DIMENSION = 16 #4, 8, 10, 16
-_NUMBER_GRU_UNITS = 2 #1 (fatal) 2, 3 no mejora, 4
-_NUMBER_GRU_NEURONS = 32 #64 no bien
-_MAXIMUM_EPOCHS = 150
+# Default values:
+
+# _LEARNING_RATE = 0.00001
+# _EMBEDDING_DIMENSION = 16 #4, 8, 10, 16
+# _NUMBER_GRU_UNITS = 2 #1 (fatal) 2, 3 no mejora, 4
+# _NUMBER_GRU_NEURONS = 32 #64 no bien
+# _MAXIMUM_EPOCHS = 150
+
+# Experiment 1:
+
+# _LEARNING_RATE = 0.00005
+# _EMBEDDING_DIMENSION = 10 
+# _NUMBER_GRU_UNITS = 2 
+# _NUMBER_GRU_NEURONS = 32
+# _MAXIMUM_EPOCHS = 100
+
+# Experiment 2:
+
+_LEARNING_RATE = 0.00001  
+_EMBEDDING_DIMENSION = 16
+_NUMBER_GRU_UNITS = 2
+_NUMBER_GRU_NEURONS = 32
+_MAXIMUM_EPOCHS = 150 
+
+# Experiment 3:
+
+# _LEARNING_RATE = 0.0001  
+# _EMBEDDING_DIMENSION = 8  
+# _NUMBER_GRU_UNITS = 2 
+# _NUMBER_GRU_NEURONS = 32 
+# _MAXIMUM_EPOCHS = 80 
 
 # MODEL INITIALIZATION
 model = TextModel(vocabulary_size=vocab_size + 1, embedding_dimension=_EMBEDDING_DIMENSION, padding_index=0,
