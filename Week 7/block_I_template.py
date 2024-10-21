@@ -1,21 +1,30 @@
 """
 DESCRIPTION: unsupervised learning with DBSCAN.
-AUTHORS: ...
-DATE: 8/11/21
+AUTHORS: Jose Valero & Lucas Fayolle
+DATE: 21/10/24
 """
 
 # MODULES IMPORT
 from scipy.spatial.distance import pdist
-# TODO Import additional required modules here
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
 # DATA LOADING
-# TODO Load your data here
+df = pd.read_csv("data.csv")
 
 # DATA EXPLORATION
-# TODO Explore your data using a scatter plot
+plt.figure(figsize=(8,6))
+plt.scatter(df.iloc[:, 0], df.iloc[:, 1])
+plt.title('Scatter Plot')
+plt.xlabel(df.columns[0])
+plt.ylabel(df.columns[1])
+plt.grid(True)
+# plt.show()
 
 # DISTANCES VECTOR
-# TODO Get the euclidean distance vector among points
+points = df.values
+distances = np.sqrt(np.sum((points[:, np.newaxis] - points[np.newaxis, :]) ** 2, axis=-1))
 
 # DISTANCES VECTOR EXPLORATION
 # Histogram

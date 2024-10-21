@@ -1,7 +1,7 @@
 """
 DESCRIPTION: unsupervised learning with DBSCAN.
-AUTHORS: ...
-DATE: 8/11/21
+AUTHORS: Jose Valero & Lucas Fayolle
+DATE: 21/10/24
 """
 
 # MODULES IMPORT
