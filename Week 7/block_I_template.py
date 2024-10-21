@@ -43,6 +43,7 @@ plt.show()
 # TODO Sort your distances in ascending order
 sorted_distances = np.sort(dist_vector)
 
+# Line plot
 plt.figure(figsize=(8,6))
 plt.plot(sorted_distances, marker='o', linestyle='-', color='b')
 plt.title('Sorted Euclidean Distances')
@@ -50,12 +51,6 @@ plt.xlabel('Index')
 plt.ylabel('Distance')
 plt.grid(True)
 plt.show()
-
-
-
-
-# Line plot
-# TODO Draw a line plot to represent the sorted distances
 
 # K-GRAPH MATRIX
 # TODO Get the K-graph distance matrix
