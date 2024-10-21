@@ -29,11 +29,8 @@ distances = np.sqrt(np.sum((points[:, np.newaxis] - points[np.newaxis, :]) ** 2,
 dist_vector = distances[np.triu_indices(len(points), k=1)] 
 
 # DISTANCES VECTOR EXPLORATION
-# Histogram
-# TODO Draw an histogram to represent the distances, adjusting the number of bins
-# Histogram of distances
 plt.figure(figsize=(8,6))
-plt.hist(dist_vector, bins=30, color='skyblue', edgecolor='black')  # You can adjust 'bins' as needed
+plt.hist(dist_vector, bins=30, color='skyblue', edgecolor='black')
 plt.title('Histogram of Pairwise Distances')
 plt.xlabel('Distance')
 plt.ylabel('Frequency')
@@ -60,24 +57,16 @@ plt.show()
 Automatizar para obtener, para diferentes valores de k, su valor correspondiente de epsilon.
 Calcular incremento en y para decidir donde cortar, porque x están equiespaciadas.
 """
+# Si se usa un tau de 4, se debe probar un k = 4
 
-k = 4
+for k in range(3, 10):
+    nbrs = NearestNeighbors(n_neighbors=k).fit(points)
+    distances, indices = nbrs.kneighbors(points)
 
-# 2. Usar NearestNeighbors para calcular las distancias de los k-vecinos más cercanos
-nbrs = NearestNeighbors(n_neighbors=k).fit(points)
-distances, indices = nbrs.kneighbors(points)
+    k_distances = distances[:, k-1] 
 
-# 3. Tomar la distancia al k-ésimo vecino más cercano para cada punto
-k_distances = distances[:, k-1]  # El último vecino es el k-ésimo
+    k_distances_sorted = np.sort(k_distances)
 
-# 4. Ordenar las distancias
-k_distances_sorted = np.sort(k_distances)
+    dy = np.diff(k_distances_sorted)
 
-# 5. Graficar el k-distance graph
-plt.figure(figsize=(8,6))
-plt.plot(k_distances_sorted)
-plt.title(f'{k}-distance graph')
-plt.xlabel('Points sorted according to distance')
-plt.ylabel(f'{k}-nearest neighbor distance')
-plt.grid(True)
-plt.show()
+    # mayor de 45 grados de pendiente
