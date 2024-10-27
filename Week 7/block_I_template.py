@@ -57,16 +57,54 @@ plt.show()
 Automatizar para obtener, para diferentes valores de k, su valor correspondiente de epsilon.
 Calcular incremento en y para decidir donde cortar, porque x están equiespaciadas.
 """
-# Si se usa un tau de 4, se debe probar un k = 4
 
-for k in range(3, 10):
-    nbrs = NearestNeighbors(n_neighbors=k).fit(points)
-    distances, indices = nbrs.kneighbors(points)
+D = df.shape[1]  
+tau_min = D + 1  
+tau_max = 10   
 
-    k_distances = distances[:, k-1] 
+results = []
 
+for tau in range(tau_min, tau_max + 1):
+    k = tau 
+
+    nbrs = NearestNeighbors(n_neighbors=k).fit(df)
+    distances, indices = nbrs.kneighbors(df)
+
+    k_distances = distances[:, k - 1]
     k_distances_sorted = np.sort(k_distances)
 
     dy = np.diff(k_distances_sorted)
+    dx = np.ones_like(dy)
 
-    # mayor de 45 grados de pendiente
+    angles = np.degrees(np.arctan(dy / dx))
+
+    significant_angle_indices = np.where(angles > 1.5)[0]
+
+    threshold_index = int(len(dy) * 0.1)
+    significant_angle_indices = significant_angle_indices[significant_angle_indices > threshold_index]
+
+    if significant_angle_indices.size > 0:
+        significant_angle_index = significant_angle_indices[0]
+        epsilon = k_distances_sorted[significant_angle_index]
+    else:
+        significant_angle_index = len(k_distances_sorted) - 1
+        epsilon = k_distances_sorted[-1]
+
+    results.append({
+        'tau': tau,
+        'k': k,
+        'epsilon': epsilon,
+        'significant_index': significant_angle_index
+    })
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(k_distances_sorted, marker='o', linestyle='-', color='b', label=f'k={k}')
+    plt.axvline(x=significant_angle_index, color='r', linestyle='--', label=f"Corte en ε={epsilon:.3f}")
+    plt.title(f'Gráfico de Distancia Ordenada para k={k} (tau={tau})')
+    plt.xlabel('Puntos ordenados por distancia')
+    plt.ylabel(f'{k}-ésimo vecino más cercano')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
+    print(f"Para tau (MinPts) = {tau}, k = {k}, el valor estimado de epsilon es {epsilon:.3f}")
