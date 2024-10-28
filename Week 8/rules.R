@@ -19,5 +19,6 @@
 # caesarea), the used aneshtesia must have been spinal, spinal/general, 
 # epidural/general or general anesthesia.
 
+!(sapply(DEL_MODE, tolower) %in% "emergency caesarea") | (sapply(DEL_TYPE_ANE, tolower) %in% c("spinal anesthesia", "spinal anesthesia / general anesthesia", "epidural anesthesia / general anesthesia", "general anesthesia"))
 
 
