@@ -53,11 +53,6 @@ plt.show()
 # K-GRAPH MATRIX
 # TODO Get the K-graph distance matrix
 
-"""
-Automatizar para obtener, para diferentes valores de k, su valor correspondiente de epsilon.
-Calcular incremento en y para decidir donde cortar, porque x están equiespaciadas.
-"""
-
 D = df.shape[1]  
 tau_min = D + 1  
 tau_max = 10   
