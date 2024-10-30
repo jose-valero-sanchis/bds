@@ -17,7 +17,7 @@ output:
 ```{r setup, include=FALSE}
 
 # IMPORTANT! -> For the development of the practice on your computers, remove the parameter 'eval = FALSE' from the following line).
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, eval = FALSE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
 
 ```
 
@@ -48,19 +48,21 @@ setwd(".")
 We install the required libraries and then load them into the working environment.
 
 ```{r eval=FALSE}
-install.packages("zoo", repos = "http://cran.us.r-project.org")
-install.packages("rts", repos = "http://cran.us.r-project.org")
-install.packages("plotly", repos = "http://cran.us.r-project.org")
-install.packages("devtools", repos = "http://cran.us.r-project.org")
+# install.packages("zoo", repos = "http://cran.us.r-project.org")
+# install.packages("rts", repos = "http://cran.us.r-project.org")
+# install.packages("plotly", repos = "http://cran.us.r-project.org")
+# install.packages("devtools", repos = "http://cran.us.r-project.org")
 ```
+
 ```{r eval=FALSE}
-library("devtools")
-devtools::install_github('c5sire/datacheck')
-devtools::install_github("hms-dbmi/EHRtemporalVariability")
+# library("devtools")
+# devtools::install_github('c5sire/datacheck')
+# devtools::install_github("hms-dbmi/EHRtemporalVariability")
 ```
 
 
 ```{r warning=FALSE}
+library("shiny")
 library("zoo")
 library("rts")
 library("plotly")
@@ -73,7 +75,7 @@ library("EHRtemporalVariability")
 
 We set the initial parameters of the data. The main date of the records, which will be used for the purpose of monitoring the delivery care indicators, is the date of birth.
 
-```{r }
+```{r}
 # File name
 fileName = "data/DQIinfantFeeding.csv"
 # Whether it has a header or not
@@ -88,7 +90,7 @@ missingValue = NaN
 
 We load the file __data/DQIinfantFeeding.csv__ in a __data.frame__ named __repository__:
 
-```{r }
+```{r}
 repository <- read.csv2(fileName, header=hasHeader, na.strings=missingValue)
 
 # We collect the number of rows and columns
@@ -129,7 +131,7 @@ indicatorEBF_delroom <- function(dataset){
 
 Once the function is loaded in the environment, we can easily apply it to the batches of data at the desired time frequency using the **apply** family of functions from the **xts** (*Raster Time Series Analysis*) library. In this monthly case, we will use __apply.monthly__, to which we will pass as parameters the repository converted to **zoo** and the previously created function:
 
-```{r }
+```{r, fig.align = 'center'}
 
 resIndicatorES2SC_delroom =apply.monthly(zooRepository, FUN=indicatorEBF_delroom)
 
@@ -217,7 +219,7 @@ for (i in 2:ncol(resCompletenessByColumn)) {
     mode = 'lines')
 }
 
-p
+div(p, align = "center")
 ```
 
 And secondly globally, being able to calculate the result from the variable __resCompletenessByColumn__ and use the code to plot a single series from the previous code chunk:
@@ -238,7 +240,7 @@ plotly::layout(
   yaxis = list(title = "Completeness (%)")
 )
 
-p
+div(p, align = "center")
 ```
 
 ***
@@ -264,9 +266,12 @@ profile = datadict_profile(repository, rules)
 knitr::kable(profile$checks[,c(1,3,6)])
 ```
 
-```{r }
+```{r, results='asis'}
 # We list the cases that have been marked as inconsistent for each rule
-knitr::kable(profile$checks[,c(1,7)])
+library(kableExtra)
+knitr::kable(profile$checks[, c(1,7)]) %>%
+  kable_styling() %>%
+  scroll_box(width = "100%")
 ```
 
 ***
@@ -296,27 +301,23 @@ We obtain the temporal maps from the already formatted repository using the func
 probMaps <- estimateDataTemporalMap(
   data       = repositoryFormatted,
   dateColumn = "BIRTH_DATE",
-  period     = "monthly"
+  period     = "month"
 )
 ```
 
 Next we obtain the information geometry plots from the previously estimated temporal maps. To do this we will use the function __estimateIGTProjection__ on the list of temporal maps. We are going to save the results in a variable.
 
 ```{r}
-
 igtProjs <- sapply( probMaps, estimateIGTProjection )
 names( igtProjs ) <- names( probMaps )
-
 ```
 
 We can observe as an example the data temporal map and information geometry temporal (IGT) plot of the variable type of anesthesia during delivery __DEL_TYPE_ANE__:
 
 ```{r}
-
 plotDataTemporalMap(probMaps$DEL_TYPE_ANE)
 
-plotIGTProjection(igtProjs$DEL_TYPE_ANE, trajectory = TRUE)
-
+div(plotIGTProjection(igtProjs$DEL_TYPE_ANE, trajectory = TRUE), align = "center")
 ```
 
 In this example, we can see that over time there are changes or differences associated with synonymy of terms (*No anesthesia*, *no*, *Without anesthesia*), or even differences between upper and lower case (*spinal*, *Spinal*).
@@ -324,9 +325,7 @@ In this example, we can see that over time there are changes or differences asso
 Next, we are going to save the results of the temporal variability estimation in a file, so that we can upload them to the web application [EHRtemporalVariability](https://ehrtemporalvariability.upv.es/), in the **Load your RData** tab.
 
 ```{r}
-
 save(probMaps, igtProjs, file = "variabilityData.RData")
-
 ```
 
 Either using the web application, or obtaining the graphs in RStudio, we will study the temporal evolution of the type of delivery variable __DEL_MODE__, and discuss the results and their potential implications in the problem defined at the beginning of the practice on the monitoring of the early onset of lactation indicator, as well as propose a possible solution.
