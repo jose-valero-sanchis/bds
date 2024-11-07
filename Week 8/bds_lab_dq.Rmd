@@ -281,9 +281,16 @@ div(p, align = "center")
 ```
 
 ***
-📝 *DISCUSS RESULTS*
 
-...
+The first graph shows the evolution of the completeness of each variable over time, allowing us to observe specific patterns in the availability of data on a monthly basis. The vast majority of variables maintain 100% completeness consistently throughout the available period. However, other variables show greater variability:
+
+- NEO_WEIGHT_NUM maintains a relatively high completeness, although with some minor fluctuations.
+- NEO_APGAR_NUM shows a considerably low completeness and a much more erratic trend than in the previous case.
+
+Towards the end of the period, especially in 2014, there is a notable decrease in the completeness of both variables, which could indicate a change in the data collection process or specific difficulties in capturing information during those months.
+
+
+As for the second graph, it shows the overall completeness of the dataset by month, aggregating all variables to calculate an overall completeness rate. In general terms, the overall completeness rate remains high, hovering between 93% and 97%, but a gradual decrease is observed, especially from 2013 onwards, which becomes more pronounced towards the end of the observed period. This overall decline suggests a possible systemic problem affecting the data collection processes or the completeness of the records themselves. The significant drop at the end of 2014 indicates a notable event or change in data recording practices that may require further investigation to identify its exact cause and, if necessary, take steps to improve data quality in the future.
 
 ***
 
@@ -312,9 +319,12 @@ knitr::kable(profile$checks[, c(1,7)]) %>%
 ```
 
 ***
-📝 *DISCUSS RESULTS*
 
-...
+In applying the two consistency rules to the data set containing 3801 records, inconsistencies have been identified that require attention. The first rule states that if the mode of delivery is elective cesarean section, the anesthesia used should be epidural, epidural/general, spinal, spinal/general or general. According to the results, there are 220 cases that do not comply with this rule. The second rule indicates that if the mode of delivery is an emergency cesarean section, the anesthesia used should be spinal, spinal/general, epidural/general or general. In this case, 245 records were found that violate the rule.
+
+These figures represent approximately 5.79% and 6.45% of the total records for the first and second period, respectively. Overall, about 12% of the data present inconsistencies regarding the mode of delivery and type of anesthesia administered. This percentage is significant and suggests the existence of problems in the quality of the data or in the recording processes.
+
+Addressing these inconsistencies will improve the overall quality of the data and increase the reliability of data-based analyses and decisions. Corrective actions, such as reviewing and correcting data, training staff in data recording, and updating consistency rules to more accurately reflect current clinical practices, are essential.
 
 ***
 
@@ -368,9 +378,13 @@ save(probMaps, igtProjs, file = "variabilityData.RData")
 Either using the web application, or obtaining the graphs in RStudio, we will study the temporal evolution of the type of delivery variable __DEL_MODE__, and discuss the results and their potential implications in the problem defined at the beginning of the practice on the monitoring of the early onset of lactation indicator, as well as propose a possible solution.
 
 ***
-📝 *DISCUSS RESULTS*
+The first graph, a temporal heat map, shows the probability distribution of the different types of anesthesia used during delivery (variable DEL_TYPE_ANE) over time. Abrupt changes in the use of certain terms to describe anesthesia are observed, reflecting problems of consistency in data entry. For example, at certain periods the term "no" is primarily used to indicate the absence of anesthesia, while at other times this term virtually disappears and is replaced by "Without anesthesia." This alternation suggests a lack of standardization in the record, which could lead to misinterpretation of a change in clinical practice when, in fact, it is a terminological variation. Something similar occurs with the terms "spinal" and "Spinal," "epidural" and "Epidural," as well as with "local" and "Local," where differences in capitalization generate apparent fluctuations in the use of these types of anesthesia over time.
 
-...
+The second graph, a temporal informative geometry visualization (IGT), shows three major groupings corresponding to different periods: the points from 2009, the points from 2010, and the points from 2011 througsh 2014. These groupings suggest that the characteristics of the anesthesia data remained relatively consistent within each of these time blocks, generating well-defined clusters in three-dimensional space.
+
+In addition to these three main clusters, several isolated individual points are observed that lie far from both these clusters and each other. These isolated points, or outliers, represent specific periods in which anesthesia data distributions differ significantly from general trends. These outliers could reflect anomalies in data entry, point changes, or errors in recording that caused them to diverge from the more consistent groupings.
+
+Within each of the three main groups, there is no clear pattern of temporal variation that can be commented on in depth. This indicates that, within each time block, the practices or characteristics of the anesthesia data remained relatively homogeneous, with no progressive evolution or change that stands out. The absence of internal patterns within groups suggests that the differences observed between time blocks may be more related to systematic changes or inconsistencies in data entry than to a gradual evolution in anesthesia practices over time.
 
 ***
 
