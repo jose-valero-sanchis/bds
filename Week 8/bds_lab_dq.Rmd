@@ -14,6 +14,13 @@ output:
     # theme: united
 ---
 
+<style>
+  ul + p {
+    margin-top: 20px;
+  }
+</style>>
+
+
 ```{r setup, include=FALSE}
 
 # IMPORTANT! -> For the development of the practice on your computers, remove the parameter 'eval = FALSE' from the following line).
@@ -140,9 +147,20 @@ plot(resIndicatorES2SC_delroom,xlab = "Date", ylab ="%",main = "Early breastfeed
 ```
 
 ***
-📝 *DISCUSS RESULTS*
 
-...
+The graph above depicts the time trend of early initiation of breastfeeding in the delivery room from 2010 to 2014. Some highlights and key observations are detailed below:
+
+- **General trend.** The graph shows a high percentage of early initiation of lactation in the delivery room, with values ranging mostly between 80% and 100%. This indicates that, in most cases, newborns started breastfeeding within the first hour and in the delivery room environment.
+
+- **Time variability.** Although the percentage remains high, there is a slight month-to-month variability, which could reflect seasonal changes, clinical practices, or even differences in on-duty staffing or medical team responsiveness.
+
+- **Absence of data.** Observing the graph, it can be seen that information is missing in one segment, suggesting the absence of data in that period. This lack of data may be due to several reasons:
+
+  - **Possible periods without registration.** It is possible that during this interval, for administrative or technical reasons, the corresponding data may not have been recorded. This could include data collection problems, changes in the recording system, or even a period when the practice of recording breastfeeding initiation was not a priority.
+  - **Specific events.** A gap in the data could also be related to a particular event, such as a delivery room remodel, staffing changes, or special circumstances (e.g., disease outbreaks, restrictions on hospital activity), that temporarily affected the collection of these data.
+  
+  
+  The lack of data in one section of the chart limits the continuous interpretation of the indicator over time, and can make it difficult to identify trends and patterns. As the gap is significant, it would be advisable to investigate the exact cause to determine whether the overall pattern of early breastfeeding initiation could be affected by this absence of information.
 
 ***
 
@@ -169,9 +187,28 @@ completenessByDataset
 ```
 
 ***
-📝 *DISCUSS RESULTS*
+In general, the data set presents a high degree of completeness, with 95.12% of data not missing. This suggests that, in general terms, most of the information needed for the analysis is available and the dataset is robust to carry out reliable studies.
 
-Los datos son los los faltantes sino para los que sí que hay valores.
+When analyzing the situation by the different variables, we observe that several of them are 100% complete. These include:
+
+- PATIENT_ID
+- DEL_TYPE_A
+- DEL_MODE
+- DEL_TYPE_ANE
+- DEL_IN_INTRACA
+- BIRTH_DATE
+- NEO_ES2SC_TYPE
+- NEO_ES2SCP_TYPE
+- NEO_MOMFBF_TYPE
+- NEO_PFBF_TYPE
+- NEO_FBFEVAL_TY
+- NEO_PHCORD_TXT
+- NEO_BF_DIS
+
+However, not all variables present the same level of completeness. Specifically, the variable NEO_WEIGHT_NUM has a completeness of 95.42%, which means that there is a small percentage of missing data. Although this percentage is relatively low, birth weight is a critical indicator in neonatal studies, so it would be convenient to review the reasons behind these missing data and consider strategies to manage them, such as data imputation or sensitivity analysis.
+
+More worrisome is the case of the NEO_APGAR_NUM variable, which presents a completeness of 31.31%. This implies that about 68.69% of the data are missing for this variable. Given that the [Apgar score](https://medlineplus.gov/ency/article/003402.htm) is a fundamental measure for assessing the immediate physical condition of the newborn, the absence of this information in such a high proportion of cases could limit the ability to perform complete and accurate analyses in this setting.
+
 
 ***
 
