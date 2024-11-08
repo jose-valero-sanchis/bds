@@ -1,0 +1,394 @@
+---
+title: "Biomedical Data Science - Data Quality lab session"
+author: |
+        | Carlos Sáez <carsaesi@upv.es>
+        |
+        | Biomedical Data Science Lab, Departamento of Applied Physics, Universitat Politècnica de València, España
+date: "October, 2022"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc-title: "Contenido"
+    number_sections: true
+    # theme: united
+---
+
+<style>
+  ul + p {
+    margin-top: 20px;
+  }
+</style>>
+
+
+```{r setup, include=FALSE}
+
+# IMPORTANT! -> For the development of the practice on your computers, remove the parameter 'eval = FALSE' from the following line).
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+
+```
+
+# Introduction
+
+This practice is part of the subject *Biomedical Data Science* of the *Degree in Data Science* of the *Universitat Politècnica de València*, and taught by the *Department of Applied Physics*.
+
+The measurement of data quality dimensions (DQ) is the central axis for the evaluation and improvement of data quality as well as for its correct and optimal use. Data quality dimensions are individual aspects or constructs that represent data quality attributes. To these can be associated one or more metrics, quantified with specific methods, as well as exploratory methods.
+
+This practice is intended to provide an initial basis for the evaluation of DQ metrics. It will consist of the application of a series of methods for different dimensions of DQ. In the context of the maternal and child clinical setting, we will analyze a data file whose ultimate purpose is the monitoring of care indicators in this setting. Depending on the dimension, we will apply the methods and calculate the metrics both in general for the whole dataset and monitored over batches of time (by months), simulating the results of a DQ monitoring and continuous improvement system.
+
+In some parts of the code we will find the text ##TODO## that we will need to complete. Additionally, we will have to discuss the results in those points where it is indicated. The deliverable of the practice will consist of the compilation in *html* of this *R markdown* file, using *Knit*, where the results of the execution and figures will be observed, and having completed the ##TODO## and commented the results.
+
+# Preparation of the work environment
+
+We check that the working directory is in the one where we have the practice file and the folder with the data:
+
+```{r eval=FALSE}
+getwd()
+```
+
+Otherwise, we set it (change the example directory to ours):
+
+```{r eval=FALSE}
+setwd(".")
+```
+
+We install the required libraries and then load them into the working environment.
+
+```{r eval=FALSE}
+# install.packages("zoo", repos = "http://cran.us.r-project.org")
+# install.packages("rts", repos = "http://cran.us.r-project.org")
+# install.packages("plotly", repos = "http://cran.us.r-project.org")
+# install.packages("devtools", repos = "http://cran.us.r-project.org")
+```
+
+```{r eval=FALSE}
+# library("devtools")
+# devtools::install_github('c5sire/datacheck')
+# devtools::install_github("hms-dbmi/EHRtemporalVariability")
+```
+
+
+```{r warning=FALSE}
+library("shiny")
+library("zoo")
+library("rts")
+library("plotly")
+library("datacheck")
+library("EHRtemporalVariability")
+```
+
+
+# Data loading
+
+We set the initial parameters of the data. The main date of the records, which will be used for the purpose of monitoring the delivery care indicators, is the date of birth.
+
+```{r}
+# File name
+fileName = "data/DQIinfantFeeding.csv"
+# Whether it has a header or not
+hasHeader = TRUE
+# Main date column to be used for monitoring purposes
+dateColumn = "BIRTH_DATE"
+# Format of the previous date
+dateFormat = '%d/%m/%Y'
+# Which text string will represent missing data
+missingValue = NaN
+```
+
+We load the file __data/DQIinfantFeeding.csv__ in a __data.frame__ named __repository__:
+
+```{r}
+repository <- read.csv2(fileName, header=hasHeader, na.strings=missingValue)
+
+# We collect the number of rows and columns
+
+N <- nrow(repository)
+D <- ncol(repository)
+```
+
+For monitoring purposes, we will use the __zoo__ library (*S3 Infrastructure for Regular and Irregular Time Series - Z's Ordered Observations*) to convert the data, the *data.frame*, to a format suited for batch analyses, the *zoo* format.
+
+```{r warning = FALSE}
+zooRepository <- read.zoo(repository,format = dateFormat,index.column = dateColumn)
+```
+
+# Problem in the monitoring of indicators
+
+One of the main uses of the maternal and infant data repository studied is the monitoring of quality of care indicators. In the field of newborn feeding, one of the most important indicators is whether there has been early initiation of breastfeeding in the delivery room. To calculate this indicator, we create the following function that will obtain the indicator for each batch of data received, so that we can apply it repeatedly for each batch given a frequency. 
+
+```{r}
+
+indicatorEBF_delroom <- function(dataset){
+  
+  numerator = (dataset$NEO_MOMFBF_TYPE %in% 'During the 1st hour') &
+    (dataset$NEO_PFBF_TYPE %in% 'Delivery room') &
+    (dataset$DEL_MODE %in% c('Vaginal delivery', 'Thierry\'s spatulas', 'Forceps delivery', 'Vacuum delivery'))
+
+  denominator = (dataset$NEO_MOMFBF_TYPE %in% c('During the 1st hour', 'During the 2nd hour', 'During the 3rd hour','Breastfeeding does not start')) &
+    (dataset$NEO_PFBF_TYPE %in% c('Delivery room', 'Hospitalization unit', 'Breastfeeding does not start')) &
+    !(dataset$NEO_FBFEVAL_TY %in% 'Undesired breastfeeding') &
+    (dataset$DEL_MODE %in% c('Vaginal delivery', 'Thierry\'s spatulas', 'Forceps delivery', 'Vacuum delivery'))
+
+  indicator = sum(numerator)/sum(denominator) * 100
+  
+  return(indicator)
+}
+
+```
+
+Once the function is loaded in the environment, we can easily apply it to the batches of data at the desired time frequency using the **apply** family of functions from the **xts** (*Raster Time Series Analysis*) library. In this monthly case, we will use __apply.monthly__, to which we will pass as parameters the repository converted to **zoo** and the previously created function:
+
+```{r, fig.align = 'center'}
+
+resIndicatorES2SC_delroom =apply.monthly(zooRepository, FUN=indicatorEBF_delroom)
+
+plot(resIndicatorES2SC_delroom,xlab = "Date", ylab ="%",main = "Early breastfeeding start in the delivery room", ylim=c(0,100))
+
+```
+
+***
+
+The graph above depicts the time trend of early initiation of breastfeeding in the delivery room from 2010 to 2014. Some highlights and key observations are detailed below:
+
+- **General trend.** The graph shows a high percentage of early initiation of lactation in the delivery room, with values ranging mostly between 80% and 100%. This indicates that, in most cases, newborns started breastfeeding within the first hour and in the delivery room environment.
+
+- **Time variability.** Although the percentage remains high, there is a slight month-to-month variability, which could reflect seasonal changes, clinical practices, or even differences in on-duty staffing or medical team responsiveness.
+
+- **Absence of data.** Observing the graph, it can be seen that information is missing in one segment, suggesting the absence of data in that period. This lack of data may be due to several reasons:
+
+  - **Possible periods without registration.** It is possible that during this interval, for administrative or technical reasons, the corresponding data may not have been recorded. This could include data collection problems, changes in the recording system, or even a period when the practice of recording breastfeeding initiation was not a priority.
+  - **Specific events.** A gap in the data could also be related to a particular event, such as a delivery room remodel, staffing changes, or special circumstances (e.g., disease outbreaks, restrictions on hospital activity), that temporarily affected the collection of these data.
+  
+  
+  The lack of data in one section of the chart limits the continuous interpretation of the indicator over time, and can make it difficult to identify trends and patterns. As the gap is significant, it would be advisable to investigate the exact cause to determine whether the overall pattern of early breastfeeding initiation could be affected by this absence of information.
+
+***
+
+# Completeness
+
+## General
+
+We will find the missing data in the repository and calculate the corresponding metrics. First, for each variable:
+
+```{r }
+NAmatrix <- !is.na(repository)
+sumNAmatrix <- apply(NAmatrix,2,sum)
+completenessByColumn <- round(sumNAmatrix/N*100,2)
+completenessByColumn
+```
+
+Next, we will calculate and display the overall percentage of missing data:
+
+```{r }
+totalNonMissing <- sum(NAmatrix)
+totalValues <- N * D 
+completenessByDataset <- round((totalNonMissing / totalValues) * 100, 2)
+completenessByDataset
+```
+
+***
+In general, the data set presents a high degree of completeness, with 95.12% of data not missing. This suggests that, in general terms, most of the information needed for the analysis is available and the dataset is robust to carry out reliable studies.
+
+When analyzing the situation by the different variables, we observe that several of them are 100% complete. These include:
+
+- PATIENT_ID
+- DEL_TYPE_A
+- DEL_MODE
+- DEL_TYPE_ANE
+- DEL_IN_INTRACA
+- BIRTH_DATE
+- NEO_ES2SC_TYPE
+- NEO_ES2SCP_TYPE
+- NEO_MOMFBF_TYPE
+- NEO_PFBF_TYPE
+- NEO_FBFEVAL_TY
+- NEO_PHCORD_TXT
+- NEO_BF_DIS
+
+However, not all variables present the same level of completeness. Specifically, the variable NEO_WEIGHT_NUM has a completeness of 95.42%, which means that there is a small percentage of missing data. Although this percentage is relatively low, birth weight is a critical indicator in neonatal studies, so it would be convenient to review the reasons behind these missing data and consider strategies to manage them, such as data imputation or sensitivity analysis.
+
+More worrisome is the case of the NEO_APGAR_NUM variable, which presents a completeness of 31.31%. This implies that about 68.69% of the data are missing for this variable. Given that the [Apgar score](https://medlineplus.gov/ency/article/003402.htm) is a fundamental measure for assessing the immediate physical condition of the newborn, the absence of this information in such a high proportion of cases could limit the ability to perform complete and accurate analyses in this setting.
+
+
+***
+
+## Monitoring
+
+To monitor the completeness by temporary batches we will create a function that does this calculation for each batch it receives as a parameter, and returns the completeness for each column, the function __dimCompletessByColumn__:
+
+```{r }
+dimCompletenessByColumn <- function(repository){
+  N = dim(repository)[1]
+  NAmatrix <- !is.na(repository)
+  sumNAmatrix <- apply(NAmatrix,2,sum)
+  completenessByColumn <- round(sumNAmatrix/N*100,2)
+  return(completenessByColumn)
+}
+
+```
+
+Once the function is loaded in the environment, we can easily apply it to the batches of data at the desired time frequency using the **apply** family of functions from the **xts** (*Raster Time Series Analysis*) library. In this monthly case, we will use __apply.monthly__, to which we will pass as parameters the repository converted to **zoo** and the previously created function:
+
+```{r }
+resCompletenessByColumn = apply.monthly(zooRepository, dimCompletenessByColumn)
+```
+
+Now, we can create a plot with the results using the **plotly** library (Create Interactive Web Graphics via 'plotly.js'). First for each variable:
+
+```{r}
+p <-
+  plot_ly(
+    x = index(resCompletenessByColumn),
+    y = resCompletenessByColumn[, 1],
+    name = names(resCompletenessByColumn)[1],
+    type = 'scatter',
+    mode = 'lines'
+  ) %>%
+  plotly::layout(
+    title = 'Completeness by month',
+    xaxis = list(title = "Date"),
+    yaxis = list (title = "Completeness (%)")
+  )
+
+for (i in 2:ncol(resCompletenessByColumn)) {
+  p = p %>% plotly::add_trace(y = resCompletenessByColumn[, i],
+    name = names(resCompletenessByColumn)[i],
+    mode = 'lines')
+}
+
+div(p, align = "center")
+```
+
+And secondly globally, being able to calculate the result from the variable __resCompletenessByColumn__ and use the code to plot a single series from the previous code chunk:
+
+```{r}
+globalCompletenessByMonth <- rowMeans(resCompletenessByColumn, na.rm = TRUE)
+
+p <- plot_ly(
+  x = index(resCompletenessByColumn),
+  y = globalCompletenessByMonth,
+  name = "Global Completeness",
+  type = 'scatter',
+  mode = 'lines'
+) %>%
+plotly::layout(
+  title = 'Global Completeness by Month',
+  xaxis = list(title = "Date"),
+  yaxis = list(title = "Completeness (%)")
+)
+
+div(p, align = "center")
+```
+
+***
+
+The first graph shows the evolution of the completeness of each variable over time, allowing us to observe specific patterns in the availability of data on a monthly basis. The vast majority of variables maintain 100% completeness consistently throughout the available period. However, other variables show greater variability:
+
+- NEO_WEIGHT_NUM maintains a relatively high completeness, although with some minor fluctuations.
+- NEO_APGAR_NUM shows a considerably low completeness and a much more erratic trend than in the previous case.
+
+Towards the end of the period, especially in 2014, there is a notable decrease in the completeness of both variables, which could indicate a change in the data collection process or specific difficulties in capturing information during those months.
+
+
+As for the second graph, it shows the overall completeness of the dataset by month, aggregating all variables to calculate an overall completeness rate. In general terms, the overall completeness rate remains high, hovering between 93% and 97%, but a gradual decrease is observed, especially from 2013 onwards, which becomes more pronounced towards the end of the observed period. This overall decline suggests a possible systemic problem affecting the data collection processes or the completeness of the records themselves. The significant drop at the end of 2014 indicates a notable event or change in data recording practices that may require further investigation to identify its exact cause and, if necessary, take steps to improve data quality in the future.
+
+***
+
+# Consistency
+
+We are going to analyze two multivariate consistency rules in the data. For this we will use the __datacheck__ library (*Tools for Checking Data Consistency*), which allows us to write logical rules in R language, using the variable names of our data. These rules will be written in the attached file __rules.R__, the first one is provided as an example, and the second one should be coded based on the provided natural language expression rule.
+
+```{r results='hide', warning=FALSE}
+# We read the rules file
+rules = read_rules("rules.R")
+# We evaluate the rules on our data
+profile = datadict_profile(repository, rules)
+```
+
+```{r }
+# We show the account of errors for each rule
+knitr::kable(profile$checks[,c(1,3,6)])
+```
+
+```{r, results='asis'}
+# We list the cases that have been marked as inconsistent for each rule
+library(kableExtra)
+knitr::kable(profile$checks[, c(1,7)]) %>%
+  kable_styling() %>%
+  scroll_box(width = "100%")
+```
+
+***
+
+In applying the two consistency rules to the data set containing 3801 records, inconsistencies have been identified that require attention. The first rule states that if the mode of delivery is elective cesarean section, the anesthesia used should be epidural, epidural/general, spinal, spinal/general or general. According to the results, there are 220 cases that do not comply with this rule. The second rule indicates that if the mode of delivery is an emergency cesarean section, the anesthesia used should be spinal, spinal/general, epidural/general or general. In this case, 245 records were found that violate the rule.
+
+These figures represent approximately 5.79% and 6.45% of the total records for the first and second period, respectively. Overall, about 12% of the data present inconsistencies regarding the mode of delivery and type of anesthesia administered. This percentage is significant and suggests the existence of problems in the quality of the data or in the recording processes.
+
+Addressing these inconsistencies will improve the overall quality of the data and increase the reliability of data-based analyses and decisions. Corrective actions, such as reviewing and correcting data, training staff in data recording, and updating consistency rules to more accurately reflect current clinical practices, are essential.
+
+***
+
+# Temporal variability
+
+We are going to analyze if there are pattern changes in the data distributions over time. To do this we will use the __EHRtemporalVariability__ library (*Delineating Temporal Dataset Shifts in Electronic Health Records*). First, we change to basic type __Date__ the case date, originally in text format:
+
+```{r}
+
+repositoryFormatted <- EHRtemporalVariability::formatDate(
+              input         = repository,
+              dateColumn    = "BIRTH_DATE",
+              dateFormat = dateFormat
+             )
+
+```
+
+We obtain the temporal maps from the already formatted repository using the function __estimateDataTemporalMap__ and selecting a monthly period. We can get the help of the function by typing *?estimateDataTemporalMap* in the console (it is only necessary to pass the data, the column with the date, and the desired period, the rest is obtained automatically from the data).
+
+```{r}
+probMaps <- estimateDataTemporalMap(
+  data       = repositoryFormatted,
+  dateColumn = "BIRTH_DATE",
+  period     = "month"
+)
+```
+
+Next we obtain the information geometry plots from the previously estimated temporal maps. To do this we will use the function __estimateIGTProjection__ on the list of temporal maps. We are going to save the results in a variable.
+
+```{r}
+igtProjs <- sapply( probMaps, estimateIGTProjection )
+names( igtProjs ) <- names( probMaps )
+```
+
+We can observe as an example the data temporal map and information geometry temporal (IGT) plot of the variable type of anesthesia during delivery __DEL_TYPE_ANE__:
+
+```{r}
+plotDataTemporalMap(probMaps$DEL_TYPE_ANE)
+
+div(plotIGTProjection(igtProjs$DEL_TYPE_ANE, trajectory = TRUE), align = "center")
+```
+
+In this example, we can see that over time there are changes or differences associated with synonymy of terms (*No anesthesia*, *no*, *Without anesthesia*), or even differences between upper and lower case (*spinal*, *Spinal*).
+
+Next, we are going to save the results of the temporal variability estimation in a file, so that we can upload them to the web application [EHRtemporalVariability](https://ehrtemporalvariability.upv.es/), in the **Load your RData** tab.
+
+```{r}
+save(probMaps, igtProjs, file = "variabilityData.RData")
+```
+
+Either using the web application, or obtaining the graphs in RStudio, we will study the temporal evolution of the type of delivery variable __DEL_MODE__, and discuss the results and their potential implications in the problem defined at the beginning of the practice on the monitoring of the early onset of lactation indicator, as well as propose a possible solution.
+
+***
+The first graph, a temporal heat map, shows the probability distribution of the different types of anesthesia used during delivery (variable DEL_TYPE_ANE) over time. Abrupt changes in the use of certain terms to describe anesthesia are observed, reflecting problems of consistency in data entry. For example, at certain periods the term "no" is primarily used to indicate the absence of anesthesia, while at other times this term virtually disappears and is replaced by "Without anesthesia." This alternation suggests a lack of standardization in the record, which could lead to misinterpretation of a change in clinical practice when, in fact, it is a terminological variation. Something similar occurs with the terms "spinal" and "Spinal," "epidural" and "Epidural," as well as with "local" and "Local," where differences in capitalization generate apparent fluctuations in the use of these types of anesthesia over time.
+
+The second graph, a temporal informative geometry visualization (IGT), shows three major groupings corresponding to different periods: the points from 2009, the points from 2010, and the points from 2011 througsh 2014. These groupings suggest that the characteristics of the anesthesia data remained relatively consistent within each of these time blocks, generating well-defined clusters in three-dimensional space.
+
+In addition to these three main clusters, several isolated individual points are observed that lie far from both these clusters and each other. These isolated points, or outliers, represent specific periods in which anesthesia data distributions differ significantly from general trends. These outliers could reflect anomalies in data entry, point changes, or errors in recording that caused them to diverge from the more consistent groupings.
+
+Within each of the three main groups, there is no clear pattern of temporal variation that can be commented on in depth. This indicates that, within each time block, the practices or characteristics of the anesthesia data remained relatively homogeneous, with no progressive evolution or change that stands out. The absence of internal patterns within groups suggests that the differences observed between time blocks may be more related to systematic changes or inconsistencies in data entry than to a gradual evolution in anesthesia practices over time.
+
+***
+
+
+# Acknowledgments
+The maternal and infant data studied have been kindly provided by Ricardo García de León for educational purposes only. Their use or distribution outside this subject and practice is forbidden.
+
