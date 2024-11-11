@@ -108,13 +108,13 @@ SmithWaterman <- function(S,R,delta, decisionf=max,Peor=-Inf)
 		for (j in 2:n)
 		{
 		  #deletion of u[i]
-			costes["B"] <-   #TODO EXERCICE 1
+			costes["B"] <- trellis[i-1, j] + delta(u[i], "-")
 			
 			#insertion of v[j]
-			costes["I"] <-   #TODO EXERCICE 1
+			costes["I"] <- trellis[i, j-1] + delta("-", v[j])
 
 			#sustitution or match u[i]==v[j]
-			costes["MoS"] <-   #TODO EXERCICE 1
+			costes["MoS"] <- trellis[i-1, j-1] + delta(u[i], v[j])
 			
 			#cost of the operation
 			trellis[i,j] <- decisionf(costes)
@@ -149,36 +149,25 @@ SmithWaterman <- function(S,R,delta, decisionf=max,Peor=-Inf)
 
 cholesterol_level <- function(CHO_TOTAL)
 {
-  #return "high", "borderline" or "normal" depending the level of total cholesterol according to the next guideline:
-  #Total cholesterol levels less than 200 milligrams per deciliter (mg/dL) are considered desirable for adults. A reading between 200 and 239 mg/dL is considered borderline high, and a reading of 240 mg/dL and above is considered high.
-  
-  #TODO EXERCICE 2
   CHO_TOTAL_normal <- (CHO_TOTAL < 200.0)
-  CHO_TOTAL_borderline <- (CHO_TOTAL >= 200.0) & (CHO_TOTAL < 240)
-  CHO_TOTAL_high <-(CHO_TOTAL >= 240)
-  if (CHO_TOTAL_high) return(#TODO EXERCISE 2)
-  if (CHO_TOTAL_borderline) return(#TODO EXERCISE 2)
-  if (CHO_TOTAL_normal) return(#TODO EXERCISE 2)
+  CHO_TOTAL_borderline <- (CHO_TOTAL >= 200.0) & (CHO_TOTAL < 240.0)
+  CHO_TOTAL_high <- (CHO_TOTAL >= 240.0)
   
+  if (CHO_TOTAL_high) return("high")
+  if (CHO_TOTAL_borderline) return("borderline")
+  if (CHO_TOTAL_normal) return("normal")
 }
 
-blood_preasure_level <- function(BP_systolic,BP_diastolic)
+blood_preasure_level <- function(BP_systolic, BP_diastolic)
 {
-  #return "high", "prehypertension" or "normal", depending the levels of systolic and diastolic blood preasures according 
-  #to the next guideline:
-  # Normal	systolic: less than 120 mm Hg diastolic: less than 80 mm Hg
-  # At Risk (prehypertension)	systolic: 120-139 mm Hg diastolic: 80-89 mm Hg
-  # High Blood Pressure (hypertension)	systolic: 140 mm Hg or higher diastolic: 90 mm Hg or higher
-
-  #TODO EXERCICE 3
-  
-  BP_normal <- (BP_systolic < 120.0) & (BP_diastolic < 80.0)
-  BP_prehypertension <- (BP_systolic >= 120.0 & BP_systolic < 140.0 ) | (BP_diastolic >= 80.0 & BP_diastolic < 90.0 )
   BP_high <- (BP_systolic >= 140.0) | (BP_diastolic >= 90.0)
-  if (BP_high) return(#TODO EXERCISE 3)
-  if (BP_prehypertension) return(#TODO EXERCISE 3)
-  if (BP_normal) return(#TODO EXERCISE 3)
+  BP_prehypertension <- ((BP_systolic >= 120.0 & BP_systolic < 140.0) | 
+                           (BP_diastolic >= 80.0 & BP_diastolic < 90.0))
+  BP_normal <- (BP_systolic < 120.0) & (BP_diastolic < 80.0)
   
+  if (BP_high) return("high")
+  if (BP_prehypertension) return("prehypertension")
+  if (BP_normal) return("normal")
 }
 
 #delta matrix for cholecterol levels
@@ -238,7 +227,7 @@ delta <- function(ui,vj)
   }
   # return the score of the delta function by adding the delta functions for cholesterol and blood preasure levels
 
-  return(#TODO EXERCISE 4)
+  return(delta_CHO_TOTAL[ui_cholesterol_level, vj_cholesterol_level] + delta_BLOOD_PREASURE[ui_blood_preasure_level, vj_blood_preasure_level])
   
 }
 
@@ -265,18 +254,18 @@ print(seq2)
 print(seq3)
 t23sw <- SmithWaterman(seq2,seq3,delta)
 
-#seq 4 <- TODO EXERCICE 5
-#seq 5 <- TODO EXERCICE 5
-#seq 6 <- TODO EXERCICE 5
+seq4 <- "200.0+130.0+85.0 205.0+135.0+88.0 210.0+140.0+90.0 215.0+145.0+92.0 220.0+150.0+95.0 225.0+155.0+98.0"
+seq5 <- "180.0+120.0+80.0 190.0+125.0+85.0 200.0+130.0+90.0 210.0+135.0+95.0 220.0+140.0+100.0 230.0+145.0+105.0"
+seq6 <- "150.0+100.0+70.0 160.0+105.0+75.0 170.0+110.0+80.0 180.0+115.0+85.0 190.0+120.0+90.0 200.0+125.0+95.0 210.0+130.0+100.0"
 
-# print(seq4) #TODO EXERCICE 5
-# print(seq5) #TODO EXERCICE 5
-# t45sw <- SmithWaterman(seq4,seq5,delta) #TODO EXERCICE 5
+print(seq4) #TODO EXERCICE 5
+print(seq5) #TODO EXERCICE 5
+t45sw <- SmithWaterman(seq4,seq5,delta) #TODO EXERCICE 5
 
-# print(seq4) #TODO EXERCICE 5
-# print(seq6) #TODO EXERCICE 5
-# t46sw <- SmithWaterman(seq4,seq6,delta) #TODO EXERCICE 5
+print(seq4) #TODO EXERCICE 5
+print(seq6) #TODO EXERCICE 5
+t46sw <- SmithWaterman(seq4,seq6,delta) #TODO EXERCICE 5
 
-# print(seq5) #TODO EXERCICE 5
-# print(seq6) #TODO EXERCICE 5
-# t56sw <- SmithWaterman(seq5,seq6,delta) #TODO EXERCICE 5
+print(seq5) #TODO EXERCICE 5
+print(seq6) #TODO EXERCICE 5
+t56sw <- SmithWaterman(seq5,seq6,delta) #TODO EXERCICE 5
