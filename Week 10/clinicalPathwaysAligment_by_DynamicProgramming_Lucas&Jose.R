@@ -1,3 +1,4 @@
+### BDS - Practical session 10 - Alignment of patients trajectories
 
 BackTrackingLocal <- function(trellisBT, decisionf=max)
 {
