@@ -1,0 +1,8 @@
+config_name,description,final_train_acc,final_val_acc
+original,Modelo base sin modificaciones,0.6928571462631226,0.75
+extra_dense,Añade capa Dense de 100 unidades antes de la salida,0.6571428775787354,0.5666666626930237
+two_conv_per_level,Agrega una segunda capa Conv3D en cada bloque,0.8142856955528259,0.7666666507720947
+relu_to_sigmoid,Cambia la activación ReLU por sigmoid en todas las capas,0.6571428775787354,0.7166666388511658
+max_to_avg_pooling,Usa AveragePooling3D en lugar de MaxPooling3D,0.5785714387893677,0.7166666388511658
+residual_blocks,Reemplaza capas conv por bloques residuales,0.6571428775787354,0.6666666865348816
+inception_blocks,Reemplaza capas conv por bloques inception 3D,0.5571428537368774,0.699999988079071
